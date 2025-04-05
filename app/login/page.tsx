@@ -18,7 +18,7 @@ export default function LoginPage() {
   const { toast } = useToast();
 
   // Get the redirect path from URL params
-  const redirectPath = "/dashboard";
+  const redirectPath = "/dashboard"; // Default redirect path
 
   // If already authenticated, redirect
   useEffect(() => {
