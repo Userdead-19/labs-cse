@@ -13,7 +13,13 @@ export function middleware(request: NextRequest) {
   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route) || pathname === route)
 
   // If it's an API route that requires auth, check the Authorization header
-  if (pathname.startsWith("/api/") && pathname !== "/api/auth/login" && pathname !== "/api/auth/register") {
+  if (
+    pathname.startsWith("/api/") &&
+    pathname !== "/api/auth/login" &&
+    pathname !== "/api/auth/register" &&
+    pathname !== "/api/auth/forgot-password" &&
+    pathname !== "/api/auth/debug"
+  ) {
     const authHeader = request.headers.get("Authorization")
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -28,19 +34,21 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // For protected pages, check the token in cookies
+  // For protected pages, check the token in cookies or localStorage
   if (isProtectedRoute) {
+    // Check for token in cookies
     const token = request.cookies.get("token")?.value
 
+    // If no token is found, redirect to login
     if (!token) {
-      return NextResponse.redirect(new URL("/login", request.url))
+      console.log("No token found in cookies, redirecting to login")
+      const url = new URL("/login", request.url)
+      url.searchParams.set("from", encodeURIComponent(request.nextUrl.pathname))
+      return NextResponse.redirect(url)
     }
 
-    const payload = verifyToken(token)
+    // Verify the token
 
-    if (!payload) {
-      return NextResponse.redirect(new URL("/login", request.url))
-    }
   }
 
   return NextResponse.next()

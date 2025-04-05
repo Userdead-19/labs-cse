@@ -27,7 +27,7 @@ const UserSchema: Schema = new Schema(
     yearGroup: {
       type: Number,
       enum: [1, 2, 3, 4],
-      required: function () {
+      required: function (this: any) {
         return this.role === "Student" || this.role === "YearCoordinator"
       },
     },
@@ -50,7 +50,12 @@ UserSchema.pre<IUser>("save", async function (next) {
 
 // Method to compare passwords
 UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password)
+  try {
+    return await bcrypt.compare(candidatePassword, this.password)
+  } catch (error) {
+    console.error("Password comparison error:", error)
+    return false
+  }
 }
 
 export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema)

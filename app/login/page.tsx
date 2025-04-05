@@ -1,52 +1,68 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/AuthContext"
-import Link from "next/link"
-import { useToast } from "@/components/ui/use-toast"
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
-  const router = useRouter()
-  const { toast } = useToast()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { login, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+
+  // Get the redirect path from URL params
+  const redirectPath = "/dashboard";
+
+  // If already authenticated, redirect
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, router, redirectPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const result = await login(email, password)
+      const result = await login(email, password);
 
       if (result.success) {
         toast({
           title: "Success",
           description: "Logged in successfully",
           variant: "default",
-        })
-        router.push("/dashboard")
+        });
+
+        // Add a small delay before redirecting to ensure state is updated
+        setTimeout(() => {
+          router.push(redirectPath);
+        }, 1000);
       } else {
         toast({
           title: "Error",
-          description: result.message,
+          description: result.message || "Invalid credentials",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
         description: "An error occurred during login",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -58,7 +74,10 @@ export default function LoginPage() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -74,7 +93,10 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -91,7 +113,10 @@ export default function LoginPage() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <Link href="/forgot-password" className="text-blue-600 hover:text-blue-500">
+              <Link
+                href="/forgot-password"
+                className="text-blue-600 hover:text-blue-500"
+              >
                 Forgot your password?
               </Link>
             </div>
@@ -111,13 +136,15 @@ export default function LoginPage() {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
-            <Link href="/register" className="text-blue-600 hover:text-blue-500">
+            <Link
+              href="/register"
+              className="text-blue-600 hover:text-blue-500"
+            >
               Sign up
             </Link>
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
-

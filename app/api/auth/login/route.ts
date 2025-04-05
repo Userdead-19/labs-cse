@@ -14,9 +14,28 @@ export async function POST(request: Request) {
     const user = await User.findOne({ email })
 
     // If user not found or password doesn't match
-    if (!user || !(await user.comparePassword(password))) {
-      logger.warn("Failed login attempt", { email })
-      return NextResponse.json({ success: false, message: "Invalid email or password" }, { status: 401 })
+    if (!user) {
+      logger.warn("Failed login attempt - user not found", { email })
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid email or password",
+        },
+        { status: 401 },
+      )
+    }
+
+    // Check password
+    const isPasswordValid = await user.comparePassword(password)
+    if (!isPasswordValid) {
+      logger.warn("Failed login attempt - invalid password", { email })
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid email or password",
+        },
+        { status: 401 },
+      )
     }
 
     // Generate JWT token
@@ -33,6 +52,7 @@ export async function POST(request: Request) {
     const userResponse = user.toObject()
     delete userResponse.password
 
+    // Create response
     const response = NextResponse.json({
       success: true,
       message: "Login successful",
@@ -45,16 +65,22 @@ export async function POST(request: Request) {
       name: "token",
       value: token,
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
       path: "/",
-      sameSite: "strict",
+      sameSite: "lax", // Changed from strict to lax for better compatibility
       secure: process.env.NODE_ENV === "production",
     })
 
     return response
   } catch (error) {
     logger.error("Login error", { error: (error as Error).message })
-    return NextResponse.json({ success: false, message: "An error occurred during login" }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        message: "An error occurred during login",
+      },
+      { status: 500 },
+    )
   }
 }
 

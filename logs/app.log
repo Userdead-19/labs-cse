@@ -1,3 +1,32 @@
 {"timestamp":"2025-04-05T15:04:43.092Z","level":"warn","message":"Failed login attempt","data":{"email":"22z201@psgtech.ac.in"}}
 {"timestamp":"2025-04-05T15:05:23.348Z","level":"info","message":"New user registered","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
 {"timestamp":"2025-04-05T15:05:36.000Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:26:39.505Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:27:05.696Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:27:14.569Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:29:05.045Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:31:18.303Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:31:29.317Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:53:20.064Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:53:46.197Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:54:40.463Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T16:56:16.916Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:20:06.652Z","level":"warn","message":"Failed login attempt - invalid password","data":{"email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:20:24.295Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:21:03.329Z","level":"info","message":"New user registered","data":{"userId":"67f1667fda8e91e0551ddfe7","email":"abinav10102@gmail.com"}}
+{"timestamp":"2025-04-05T17:21:15.186Z","level":"info","message":"User logged in successfully","data":{"userId":"67f1667fda8e91e0551ddfe7","email":"abinav10102@gmail.com"}}
+{"timestamp":"2025-04-05T17:21:24.029Z","level":"info","message":"User logged in successfully","data":{"userId":"67f1667fda8e91e0551ddfe7","email":"abinav10102@gmail.com"}}
+{"timestamp":"2025-04-05T17:22:26.036Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:25:18.870Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:35:12.103Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:35:35.587Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:36:55.417Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:37:00.385Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:38:41.293Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:39:12.627Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:39:16.590Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:40:09.684Z","level":"warn","message":"Failed login attempt - invalid password","data":{"email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:40:14.218Z","level":"warn","message":"Failed login attempt - invalid password","data":{"email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:40:50.005Z","level":"info","message":"User logged in successfully","data":{"userId":"67f1667fda8e91e0551ddfe7","email":"abinav10102@gmail.com"}}
+{"timestamp":"2025-04-05T17:43:36.736Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T17:44:03.589Z","level":"info","message":"User logged in successfully","data":{"userId":"67f1667fda8e91e0551ddfe7","email":"abinav10102@gmail.com"}}
