@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import User from "@/models/User"
 import { verifyToken } from "@/lib/jwt"
-import { logger } from "@/lib/logger"
+// import { logger } from "@/lib/logger"
 
 export async function GET(request: Request) {
   try {
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     const user = await User.findById(payload.userId).select("-password") // Exclude password
 
     if (!user) {
-      logger.warn("User not found for authenticated token", { userId: payload.userId })
+      // logger.warn("User not found for authenticated token", { userId: payload.userId })
       return NextResponse.json(
         {
           success: false,
@@ -48,14 +48,14 @@ export async function GET(request: Request) {
       )
     }
 
-    logger.info("User data retrieved", { userId: payload.userId })
+    // logger.info("User data retrieved", { userId: payload.userId })
 
     return NextResponse.json({
       success: true,
       user,
     })
   } catch (error) {
-    logger.error("Get user error", { error: (error as Error).message })
+    // logger.error("Get user error", { error: (error as Error).message })
     return NextResponse.json(
       {
         success: false,

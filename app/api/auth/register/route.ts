@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     // Check if user already exists
     const existingUser = await User.findOne({ email })
     if (existingUser) {
-      logger.warn("Registration attempt with existing email", { email })
+      // logger.warn("Registration attempt with existing email", { email })
       return NextResponse.json({ success: false, message: "Email already registered" }, { status: 400 })
     }
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     })
 
     // Log successful registration
-    logger.info("New user registered", { userId: newUser._id.toString(), email })
+    // logger.info("New user registered", { userId: newUser._id.toString(), email })
 
     const response = NextResponse.json({
       success: true,
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 
     return response
   } catch (error) {
-    logger.error("Registration error", { error: (error as Error).message })
+    // logger.error("Registration error", { error: (error as Error).message })
     return NextResponse.json({ success: false, message: "An error occurred during registration" }, { status: 500 })
   }
 }

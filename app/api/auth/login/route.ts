@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import User from "@/models/User"
 import { generateToken } from "@/lib/jwt"
-import { logger } from "@/lib/logger"
+// import { logger } from "@/lib/logger"
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     // If user not found or password doesn't match
     if (!user) {
-      logger.warn("Failed login attempt - user not found", { email })
+      // logger.warn("Failed login attempt - user not found", { email })
       return NextResponse.json(
         {
           success: false,
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     // Check password
     const isPasswordValid = await user.comparePassword(password)
     if (!isPasswordValid) {
-      logger.warn("Failed login attempt - invalid password", { email })
+      // logger.warn("Failed login attempt - invalid password", { email })
       return NextResponse.json(
         {
           success: false,
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     })
 
     // Log successful login
-    logger.info("User logged in successfully", { userId: user._id.toString(), email: user.email })
+    // logger.info("User logged in successfully", { userId: user._id.toString(), email: user.email })
 
     // Remove sensitive data from user
     const userResponse = user.toObject()
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     return response
   } catch (error) {
-    logger.error("Login error", { error: (error as Error).message })
+    // logger.error("Login error", { error: (error as Error).message })
     return NextResponse.json(
       {
         success: false,
