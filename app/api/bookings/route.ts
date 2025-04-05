@@ -8,56 +8,49 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-    const labId = searchParams.get("labId");
-    const date = searchParams.get("date");
-    const status = searchParams.get("status");
-    const yearGroup = searchParams.get("yearGroup");
-    const isExam = searchParams.get("isExam");
+    // Get URL parameters
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get("userId")
+    const labId = searchParams.get("labId")
+    const date = searchParams.get("date")
+    const status = searchParams.get("status")
+    const yearGroup = searchParams.get("yearGroup")
+    const isExam = searchParams.get("isExam")
 
-    const query: any = {};
+    // Build query
+    const query: any = {}
 
     if (userId) {
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
-      }
-      query.userId = new mongoose.Types.ObjectId(userId);
+      query.userId = userId
     }
 
     if (labId) {
-      if (!mongoose.Types.ObjectId.isValid(labId)) {
-        return NextResponse.json({ error: "Invalid labId" }, { status: 400 });
-      }
-      query.labId = new mongoose.Types.ObjectId(labId);
+      query.labId = labId
     }
 
     if (date) {
-      query.date = date;
+      query.date = date
     }
 
     if (status) {
-      query.status = status;
+      query.status = status
     }
 
     if (yearGroup) {
-      query.yearGroup = Number.parseInt(yearGroup);
+      query.yearGroup = Number.parseInt(yearGroup)
     }
 
     if (isExam) {
-      query.isExam = isExam === "true";
+      query.isExam = isExam === "true"
     }
 
-    await connectToDatabase();
+    await connectToDatabase()
+    const bookings = await Booking.find(query).populate("labId", "name building").sort({ date: 1, startTime: 1 })
 
-    const bookings = await Booking.find(query)
-      .populate("labId", "name building")
-      .sort({ date: 1, startTime: 1 });
-
-    return NextResponse.json(bookings);
+    return NextResponse.json(bookings)
   } catch (error) {
-    console.error("Error fetching bookings:", error);
-    return NextResponse.json({ error: "Failed to fetch bookings" }, { status: 500 });
+    console.error("Error fetching bookings:", error)
+    return NextResponse.json({ error: "Failed to fetch bookings" }, { status: 500 })
   }
 }
 

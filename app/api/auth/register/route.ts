@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     // Set cookie with token
     response.cookies.set({
       name: "token",
-      value: token,
+      value: await token,
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: "/",

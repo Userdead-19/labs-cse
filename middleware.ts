@@ -4,7 +4,7 @@ import { verifyToken } from "./lib/jwt"
 
 const PROTECTED_ROUTES = ["/dashboard", "/bookings", "/labs", "/profile", "/admin"]
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
@@ -29,8 +29,16 @@ export function middleware(request: NextRequest) {
       }
     }
 
-    const payload = verifyToken(token)
-
+    const payload = await verifyToken(token)
+    if (!payload) {
+      if (isProtectedAPI) {
+        return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 })
+      } else {
+        const loginUrl = new URL("/login", request.url)
+        loginUrl.searchParams.set("from", encodeURIComponent(pathname))
+        return NextResponse.redirect(loginUrl)
+      }
+    }
   }
 
   return NextResponse.next()

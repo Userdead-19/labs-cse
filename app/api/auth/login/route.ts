@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     // Set cookie with token (for browser access)
     response.cookies.set({
       name: "token",
-      value: token,
+      value: await token, // Ensure token is resolved to a string
       httpOnly: true,
       maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
       path: "/",
