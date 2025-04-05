@@ -1,0 +1,3 @@
+{"timestamp":"2025-04-05T15:04:43.092Z","level":"warn","message":"Failed login attempt","data":{"email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T15:05:23.348Z","level":"info","message":"New user registered","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
+{"timestamp":"2025-04-05T15:05:36.000Z","level":"info","message":"User logged in successfully","data":{"userId":"67f146b2197af7177f68950e","email":"22z201@psgtech.ac.in"}}
