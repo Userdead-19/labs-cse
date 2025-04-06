@@ -220,9 +220,6 @@ export function CalendarView({ view = "week" }: CalendarViewProps) {
   }
 
   // Debug output to check bookings format
-  console.log("Original bookings:", bookings);
-  console.log("Normalized bookings:", normalizedBookings);
-  console.log("Filtered bookings:", filteredBookings);
 
   return (
     <Card>

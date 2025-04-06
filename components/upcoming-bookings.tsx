@@ -62,8 +62,6 @@ export function UpcomingBookings({ limit }: UpcomingBookingsProps) {
     ? sortedBookings.slice(0, limit)
     : sortedBookings;
 
-  console.log("Displayed Bookings:", displayedBookings); // Debugging line
-
   const handleDeleteBooking = async (id: string) => {
     try {
       setIsDeleting(true);
@@ -128,7 +126,6 @@ export function UpcomingBookings({ limit }: UpcomingBookingsProps) {
           month: "long",
           day: "numeric",
         });
-        console.log("Formatted Date:", formattedDate); // Debugging line
         return (
           <Card key={booking._id} className="overflow-hidden">
             <CardHeader className="pb-2">

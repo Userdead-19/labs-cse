@@ -21,12 +21,10 @@ export function ProtectedRoute({
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
-        console.log("Not authenticated, redirecting to login");
         router.push("/login");
       } else if (allowedRoles && user) {
         // Check if user role is in allowed roles
         if (!allowedRoles.includes(user.role)) {
-          console.log("User role not allowed, redirecting to dashboard");
           router.push("/dashboard");
         }
       }

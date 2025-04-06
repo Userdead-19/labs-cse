@@ -56,43 +56,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const checkAuth = async () => {
       setIsLoading(true);
-      // Get token from localStorage
       const storedToken = localStorage.getItem("token");
-
       if (!storedToken) {
-        console.log("No token found in localStorage");
         setIsLoading(false);
         return;
       }
-
       try {
-        console.log("Checking auth with token from localStorage");
-        // Validate token on the server
         const response = await fetch("/api/auth/me", {
           headers: {
             Authorization: `Bearer ${storedToken}`,
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.user) {
-            console.log("Auth check successful, user:", data.user);
-            setUser(data.user);
-            setToken(storedToken);
-          } else {
-            // If token is invalid or user not found, clear it
-            console.error("Auth check failed:", data.message);
-            localStorage.removeItem("token");
-          }
+        const data = await response.json();
+
+        if (response.ok && data.success && data.user) {
+          setUser(data.user);
+          setToken(storedToken);
         } else {
-          // If response is not ok, clear token
-          console.error("Auth check failed with status:", response.status);
-          localStorage.removeItem("token");
+          logout(); // Logout if token invalid
         }
       } catch (error) {
         console.error("Auth check error:", error);
-        localStorage.removeItem("token");
+        logout(); // Logout on fetch error
       } finally {
         setIsLoading(false);
       }
@@ -103,7 +89,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log("Attempting login for:", email);
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -114,7 +99,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       const data = await response.json();
-      console.log("Login response:", data);
 
       if (response.ok && data.success) {
         // Set user and token in state
@@ -125,7 +109,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.setItem("token", data.token);
 
         // Log successful login for debugging
-        console.log("Login successful, user:", data.user);
 
         return { success: true, message: data.message };
       } else {

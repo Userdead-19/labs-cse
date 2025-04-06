@@ -23,15 +23,7 @@ export function DashboardContent() {
     loading,
     error,
   } = useBooking();
-  console.log("DashboardContent", {
-    totalLabs,
-    availableNow,
-    userBookings,
-    upcomingUserBookings,
-    upcomingExamPeriod,
-    loading,
-    error,
-  });
+
   if (loading) {
     return <div>Loading dashboard data...</div>;
   }

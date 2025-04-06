@@ -86,7 +86,6 @@ type BookingFormValues = z.infer<typeof bookingFormSchema>;
 export function NewBookingForm() {
   const router = useRouter();
   const { user } = useAuth();
-  console.log("User:", user);
   const { labs, loading, error, refreshData } = useBooking();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -116,7 +115,6 @@ export function NewBookingForm() {
   const onSubmit = async (data: BookingFormValues) => {
     try {
       setIsSubmitting(true);
-      console.log("submitting data", data);
       // Check if user is authenticated
 
       // Convert form data to FormData for server action
@@ -133,7 +131,6 @@ export function NewBookingForm() {
       formData.append("isExam", data.isExam.toString());
       formData.append("userId", user?._id || "");
       formData.append("user", user?.name || "");
-      console.log("Form Data:", formData);
       const result = await createBooking(formData);
 
       if (result.success) {

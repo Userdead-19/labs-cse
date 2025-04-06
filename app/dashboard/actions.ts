@@ -7,7 +7,6 @@ import mongoose from "mongoose"
 export async function createBooking(formData: FormData) {
     try {
         await connectToDatabase()
-        console.log("Form Data:", formData)
         // Extract form data
         const labId = formData.get("labId") as string
         const date = formData.get("date") as string
