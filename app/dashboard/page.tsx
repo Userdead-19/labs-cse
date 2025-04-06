@@ -34,9 +34,9 @@ function DashboardLoading() {
               <div className="text-2xl font-bold">
                 <Skeleton className="h-8 w-16" />
               </div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground">
                 <Skeleton className="h-4 w-32 mt-1" />
-              </p>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -85,7 +85,6 @@ async function getDashboardData() {
       `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/labs`,
       {
         next: { revalidate: 60 },
-        cache: "no-store",
       }
     );
     const bookingsRes = await fetch(
@@ -94,7 +93,6 @@ async function getDashboardData() {
       }/api/bookings`,
       {
         next: { revalidate: 60 },
-        cache: "no-store",
       }
     );
     const examPeriodsRes = await fetch(
@@ -103,7 +101,6 @@ async function getDashboardData() {
       }/api/exam-periods`,
       {
         next: { revalidate: 60 },
-        cache: "no-store",
       }
     );
 
@@ -117,31 +114,23 @@ async function getDashboardData() {
     const totalLabs = labs.length || 0;
     const availableNow =
       totalLabs -
-      (bookings.filter(
-        (b: { date: string; startTime: number; endTime: number }) => {
-          const now = new Date();
-          const today = now.toISOString().split("T")[0];
-          const currentHour =
-            now.getHours().toString().padStart(2, "0") + ":00";
-          return (
-            b.date === today &&
-            b.startTime <= parseInt(currentHour, 10) &&
-            b.endTime > parseInt(currentHour, 10)
-          );
-        }
-      ).length || 0);
+      (bookings.filter((b: any) => {
+        const now = new Date();
+        const today = now.toISOString().split("T")[0];
+        const currentHour = now.getHours().toString().padStart(2, "0") + ":00";
+        return (
+          b.date === today &&
+          b.startTime <= currentHour &&
+          b.endTime > currentHour
+        );
+      }).length || 0);
 
     // Get upcoming exam period
     const upcomingExamPeriod = examPeriods
-      .filter(
-        (p: { startDate: string | number | Date }) =>
-          new Date(p.startDate) > new Date()
-      )
+      .filter((p: any) => new Date(p.startDate) > new Date())
       .sort(
-        (
-          a: { startDate: string | number | Date },
-          b: { startDate: string | number | Date }
-        ) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        (a: any, b: any) =>
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       )[0];
 
     return {
@@ -208,8 +197,8 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-                <UpcomingBookings userId={2} />{" "}
-                {/* In a real app, this would be the current user's ID */}
+                <UpcomingBookings />{" "}
+                {/* Will use the authenticated user's ID from context */}
               </Suspense>
             </CardContent>
           </Card>
@@ -239,16 +228,12 @@ async function DashboardContent() {
   const data = await getDashboardData();
 
   // Get user bookings (in a real app, this would be filtered by the current user's ID)
-  const userBookings = data.bookings.filter(
-    (b: { userId: number }) => b.userId === 2
-  );
-  const upcomingUserBookings = userBookings.filter(
-    (b: { date: string | number | Date }) => {
-      const bookingDate = new Date(b.date);
-      const today = new Date();
-      return bookingDate >= today;
-    }
-  ).length;
+  const userBookings = data.bookings.filter((b: any) => b.userId === 2);
+  const upcomingUserBookings = userBookings.filter((b: any) => {
+    const bookingDate = new Date(b.date);
+    const today = new Date();
+    return bookingDate >= today;
+  }).length;
 
   return (
     <>
@@ -326,8 +311,8 @@ async function DashboardContent() {
             <CardDescription>Your scheduled lab sessions</CardDescription>
           </CardHeader>
           <CardContent>
-            <UpcomingBookings userId={2} limit={3} />{" "}
-            {/* In a real app, this would be the current user's ID */}
+            <UpcomingBookings limit={3} />{" "}
+            {/* Will use the authenticated user's ID from context */}
           </CardContent>
         </Card>
       </div>

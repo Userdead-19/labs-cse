@@ -1,131 +1,147 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Calendar, Clock, MapPin } from "lucide-react"
-import { format } from "date-fns"
-import { toast } from "@/components/ui/use-toast"
-import { deleteBooking } from "@/app/actions/booking-actions"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, MapPin } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { toast } from "@/components/ui/use-toast";
+import { deleteBooking } from "@/app/actions/booking-actions";
+import { useAuth } from "@/context/AuthContext";
 
 interface UpcomingBookingsProps {
-  userId?: number
-  limit?: number
+  userId?: number;
+  limit?: number;
 }
 
 export function UpcomingBookings({ userId, limit }: UpcomingBookingsProps) {
-  const [bookings, setBookings] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [isDeleting, setIsDeleting] = useState<number | null>(null)
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const { user } = useAuth(); // Get authenticated user from context
 
   useEffect(() => {
     async function fetchBookings() {
       try {
-        setLoading(true)
+        setLoading(true);
         // Build the URL with query parameters
-        let url = "/api/bookings"
-        const params = new URLSearchParams()
+        let url = "/api/bookings";
+        const params = new URLSearchParams();
 
-        if (userId) {
-          params.append("userId", userId.toString())
+        // Use userId from props if provided, otherwise use authenticated user's ID
+        const bookingUserId = userId || user?._id;
+
+        if (bookingUserId) {
+          params.append("userId", bookingUserId.toString());
         }
 
         if (params.toString()) {
-          url += `?${params.toString()}`
+          url += `?${params.toString()}`;
         }
 
-        const response = await fetch(url, { cache: "no-store" })
+        const response = await fetch(url, { cache: "no-store" });
 
         if (response.ok) {
-          let data = await response.json()
+          let data = await response.json();
 
           // Sort by date and time
           data.sort((a: any, b: any) => {
-            const dateA = new Date(`${a.date}T${a.startTime}`)
-            const dateB = new Date(`${b.date}T${b.startTime}`)
-            return dateA.getTime() - dateB.getTime()
-          })
+            const dateA = new Date(`${a.date}T${a.startTime}`);
+            const dateB = new Date(`${b.date}T${b.startTime}`);
+            return dateA.getTime() - dateB.getTime();
+          });
 
           // Filter to only show upcoming bookings
-          const now = new Date()
+          const now = new Date();
           data = data.filter((booking: any) => {
-            const bookingDate = new Date(`${booking.date}T${booking.endTime}`)
-            return bookingDate >= now
-          })
+            const bookingDate = new Date(`${booking.date}T${booking.endTime}`);
+            return bookingDate >= now;
+          });
 
           // Limit the number of bookings if specified
           if (limit && data.length > limit) {
-            data = data.slice(0, limit)
+            data = data.slice(0, limit);
           }
 
-          setBookings(data)
+          setBookings(data);
         } else {
           // Set empty array if response is not ok
-          setBookings([])
+          setBookings([]);
         }
       } catch (error) {
-        console.error("Error fetching bookings:", error)
+        console.error("Error fetching bookings:", error);
         // Set empty array if there's an error
-        setBookings([])
+        setBookings([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    fetchBookings()
-  }, [userId, limit])
+    fetchBookings();
+  }, [userId, limit, user]);
 
   const handleDelete = async (id: number) => {
     try {
-      setIsDeleting(id)
-      const result = await deleteBooking(id)
+      setIsDeleting(id);
+      const result = await deleteBooking(id.toString());
 
       if (result.success) {
         toast({
           title: "Success",
           description: result.message,
-        })
+        });
         // Remove the booking from the state
-        setBookings(bookings.filter((booking: any) => booking.id !== id))
+        setBookings(bookings.filter((booking: any) => booking.id !== id));
       } else {
         toast({
           title: "Error",
           description: result.message,
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error deleting booking:", error)
+      console.error("Error deleting booking:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsDeleting(null)
+      setIsDeleting(null);
     }
-  }
+  };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-32">Loading bookings...</div>
+    return (
+      <div className="flex items-center justify-center h-32">
+        Loading bookings...
+      </div>
+    );
   }
 
   if (bookings.length === 0) {
-    return <div className="text-center py-8 text-muted-foreground">No upcoming bookings found.</div>
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No upcoming bookings found.
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
       {bookings.map((booking: any) => (
-        <div key={booking.id} className="flex items-center justify-between space-x-4 rounded-lg border p-4">
+        <div
+          key={booking._id}
+          className="flex items-center justify-between space-x-4 rounded-lg border p-4"
+        >
           <div className="space-y-1">
             <h3 className="font-medium">{booking.title}</h3>
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="mr-1 h-3 w-3" />
-              {booking.labId.replace("lab-", "Lab ")}
+              {booking.labId?.name ?? "Unknown Lab"}
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="mr-1 h-3 w-3" />
-              {format(new Date(booking.date), "MMMM d, yyyy")}
+              {format(parseISO(booking.date), "MMMM dd yyyy")}
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="mr-1 h-3 w-3" />
@@ -143,6 +159,5 @@ export function UpcomingBookings({ userId, limit }: UpcomingBookingsProps) {
         </div>
       ))}
     </div>
-  )
+  );
 }
-
