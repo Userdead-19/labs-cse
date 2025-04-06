@@ -17,7 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export function DashboardNav() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const isAdmin = user?.role === "admin";
   return (
     <div className="flex h-full w-full flex-col border-r bg-muted/40">
@@ -93,7 +93,11 @@ export function DashboardNav() {
         </nav>
       </div>
       <div className="mt-auto p-4">
-        <Button variant="outline" className="w-full justify-start gap-2">
+        <Button
+          variant="outline"
+          className="w-full justify-start gap-2"
+          onClick={logout}
+        >
           <LogOut className="h-4 w-4" />
           <span>Log out</span>
         </Button>
