@@ -1,96 +1,82 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useBooking } from "@/context/booking-context";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { deleteBooking } from "@/app/dashboard/actions";
 import { toast } from "@/components/ui/use-toast";
-import { deleteBooking } from "@/app/actions/booking-actions";
-import { useAuth } from "@/context/AuthContext";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface UpcomingBookingsProps {
-  userId?: number;
   limit?: number;
 }
 
-export function UpcomingBookings({ userId, limit }: UpcomingBookingsProps) {
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState<number | null>(null);
-  const { user } = useAuth(); // Get authenticated user from context
+export function UpcomingBookings({ limit }: UpcomingBookingsProps) {
+  const { userBookings, refreshData, loading, error } = useBooking();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null
+  );
 
-  useEffect(() => {
-    async function fetchBookings() {
-      try {
-        setLoading(true);
-        // Build the URL with query parameters
-        let url = "/api/bookings";
-        const params = new URLSearchParams();
-
-        // Use userId from props if provided, otherwise use authenticated user's ID
-        const bookingUserId = userId || user?._id;
-
-        if (bookingUserId) {
-          params.append("userId", bookingUserId.toString());
-        }
-
-        if (params.toString()) {
-          url += `?${params.toString()}`;
-        }
-
-        const response = await fetch(url, { cache: "no-store" });
-
-        if (response.ok) {
-          let data = await response.json();
-
-          // Sort by date and time
-          data.sort((a: any, b: any) => {
-            const dateA = new Date(`${a.date}T${a.startTime}`);
-            const dateB = new Date(`${b.date}T${b.startTime}`);
-            return dateA.getTime() - dateB.getTime();
-          });
-
-          // Filter to only show upcoming bookings
-          const now = new Date();
-          data = data.filter((booking: any) => {
-            const bookingDate = new Date(`${booking.date}T${booking.endTime}`);
-            return bookingDate >= now;
-          });
-
-          // Limit the number of bookings if specified
-          if (limit && data.length > limit) {
-            data = data.slice(0, limit);
-          }
-
-          setBookings(data);
-        } else {
-          // Set empty array if response is not ok
-          setBookings([]);
-        }
-      } catch (error) {
-        console.error("Error fetching bookings:", error);
-        // Set empty array if there's an error
-        setBookings([]);
-      } finally {
-        setLoading(false);
+  // Sort bookings by date and time
+  const sortedBookings = [...userBookings]
+    .filter((booking) => {
+      const bookingDate = new Date(booking.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return bookingDate >= today;
+    })
+    .sort((a, b) => {
+      // Sort by date first
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateA.getTime() - dateB.getTime();
       }
-    }
+      // If same date, sort by start time
+      return a.startTime.localeCompare(b.startTime);
+    });
 
-    fetchBookings();
-  }, [userId, limit, user]);
+  // Apply limit if provided
+  const displayedBookings = limit
+    ? sortedBookings.slice(0, limit)
+    : sortedBookings;
 
-  const handleDelete = async (id: number) => {
+  console.log("Displayed Bookings:", displayedBookings); // Debugging line
+
+  const handleDeleteBooking = async (id: string) => {
     try {
-      setIsDeleting(id);
-      const result = await deleteBooking(id.toString());
+      setIsDeleting(true);
+      setSelectedBookingId(id);
+
+      const result = await deleteBooking(id);
 
       if (result.success) {
         toast({
           title: "Success",
           description: result.message,
         });
-        // Remove the booking from the state
-        setBookings(bookings.filter((booking: any) => booking.id !== id));
+        refreshData();
       } else {
         toast({
           title: "Error",
@@ -99,65 +85,186 @@ export function UpcomingBookings({ userId, limit }: UpcomingBookingsProps) {
         });
       }
     } catch (error) {
-      console.error("Error deleting booking:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: "Failed to delete booking",
         variant: "destructive",
       });
     } finally {
-      setIsDeleting(null);
+      setIsDeleting(false);
+      setSelectedBookingId(null);
     }
   };
 
   if (loading) {
+    return <div>Loading your bookings...</div>;
+  }
+
+  if (error) {
     return (
-      <div className="flex items-center justify-center h-32">
-        Loading bookings...
-      </div>
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>Failed to load bookings: {error}</AlertDescription>
+      </Alert>
     );
   }
 
-  if (bookings.length === 0) {
+  if (displayedBookings.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        No upcoming bookings found.
+      <div className="text-center py-6">
+        <p className="text-muted-foreground">You have no upcoming bookings</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {bookings.map((booking: any) => (
-        <div
-          key={booking._id}
-          className="flex items-center justify-between space-x-4 rounded-lg border p-4"
-        >
-          <div className="space-y-1">
-            <h3 className="font-medium">{booking.title}</h3>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <MapPin className="mr-1 h-3 w-3" />
-              {booking.labId?.name ?? "Unknown Lab"}
-            </div>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Calendar className="mr-1 h-3 w-3" />
-              {format(parseISO(booking.date), "MMMM dd yyyy")}
-            </div>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Clock className="mr-1 h-3 w-3" />
-              {booking.startTime} - {booking.endTime}
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleDelete(booking.id)}
-            disabled={isDeleting === booking.id}
-          >
-            {isDeleting === booking.id ? "Cancelling..." : "Cancel"}
-          </Button>
-        </div>
-      ))}
+      {displayedBookings.map((booking) => {
+        const bookingDate = new Date(booking.date);
+        const formattedDate = bookingDate.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        console.log("Formatted Date:", formattedDate); // Debugging line
+        return (
+          <Card key={booking._id} className="overflow-hidden">
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-lg">{booking.title}</CardTitle>
+                <Badge
+                  variant={
+                    booking.status === "approved"
+                      ? "default"
+                      : booking.status === "pending"
+                      ? "outline"
+                      : "destructive"
+                  }
+                >
+                  {booking.status.charAt(0).toUpperCase() +
+                    booking.status.slice(1)}
+                </Badge>
+              </div>
+              <CardDescription>{booking.purpose}</CardDescription>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <div className="grid gap-2">
+                <div className="flex items-center text-sm">
+                  <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                  {formattedDate}
+                </div>
+                <div className="flex items-center text-sm">
+                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                  {booking.startTime} - {booking.endTime}
+                </div>
+                <div className="flex items-center text-sm">
+                  <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Lab: {booking.labId.name}
+                </div>
+
+                {booking.studentCount > 0 && (
+                  <div className="flex items-center text-sm">
+                    <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+                    {booking.studentCount} students
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    View Details
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{booking.title}</DialogTitle>
+                    <DialogDescription>{booking.purpose}</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <span className="text-sm font-medium">Date:</span>
+                      <span className="col-span-3">{formattedDate}</span>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <span className="text-sm font-medium">Time:</span>
+                      <span className="col-span-3">
+                        {booking.startTime} - {booking.endTime}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <span className="text-sm font-medium">Lab:</span>
+                      <span className="col-span-3">{booking.labId.name}</span>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <span className="text-sm font-medium">Year Group:</span>
+                      <span className="col-span-3">{booking.yearGroup}</span>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <span className="text-sm font-medium">Students:</span>
+                      <span className="col-span-3">{booking.studentCount}</span>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <span className="text-sm font-medium">Equipment:</span>
+                      <span className="col-span-3">
+                        {booking.equipment || "None"}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <span className="text-sm font-medium">Exam:</span>
+                      <span className="col-span-3">
+                        {booking.isExam ? "Yes" : "No"}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <span className="text-sm font-medium">Status:</span>
+                      <span className="col-span-3">
+                        <Badge
+                          variant={
+                            booking.status === "approved"
+                              ? "default"
+                              : booking.status === "pending"
+                              ? "outline"
+                              : "destructive"
+                          }
+                        >
+                          {booking.status.charAt(0).toUpperCase() +
+                            booking.status.slice(1)}
+                        </Badge>
+                      </span>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDeleteBooking(booking._id)}
+                      disabled={isDeleting && selectedBookingId === booking._id}
+                    >
+                      {isDeleting && selectedBookingId === booking._id
+                        ? "Deleting..."
+                        : "Cancel Booking"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="ml-2"
+                onClick={() => handleDeleteBooking(booking._id)}
+                disabled={isDeleting && selectedBookingId === booking._id}
+              >
+                {isDeleting && selectedBookingId === booking._id
+                  ? "Deleting..."
+                  : "Cancel"}
+              </Button>
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 }

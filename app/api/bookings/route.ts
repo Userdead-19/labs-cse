@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const query: any = {}
 
     if (userId) {
-      query.userId = userId
+      query.userId = new mongoose.Types.ObjectId(userId)
     }
 
     if (labId) {
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     if (isExam) {
       query.isExam = isExam === "true"
     }
-
+    console.log("Query:", query)
     await connectToDatabase()
     const bookings = await Booking.find(query).populate("labId", "name building").sort({ date: 1, startTime: 1 })
 

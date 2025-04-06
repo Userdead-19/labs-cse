@@ -41,6 +41,7 @@
     "@radix-ui/react-tooltip": "^1.1.6",
     "autoprefixer": "^10.4.20",
     "bcryptjs": "latest",
+    "chart.js": "^4.4.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
@@ -60,6 +61,7 @@
     "next-themes": "^0.4.4",
     "path": "latest",
     "react": "^19",
+    "react-chartjs-2": "^5.3.0",
     "react-day-picker": "8.10.1",
     "react-dom": "^19",
     "react-hook-form": "latest",
@@ -74,6 +76,7 @@
     "zod": "latest"
   },
   "devDependencies": {
+    "@types/chart.js": "^2.9.41",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22",
     "@types/react": "^19",

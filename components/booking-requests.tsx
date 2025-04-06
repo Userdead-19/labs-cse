@@ -129,7 +129,7 @@ export function BookingRequests() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleReject(request.id)}
+                onClick={() => handleReject(request._id)}
                 disabled={processing !== null}
               >
                 {processing?.id === request.id &&
@@ -139,7 +139,7 @@ export function BookingRequests() {
               </Button>
               <Button
                 size="sm"
-                onClick={() => handleApprove(request.id)}
+                onClick={() => handleApprove(request._id)}
                 disabled={processing !== null}
               >
                 {processing?.id === request.id &&
