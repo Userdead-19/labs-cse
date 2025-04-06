@@ -1,13 +1,24 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Bar,
   BarChart,
-  ResponsiveContainer,
   XAxis,
   YAxis,
   Tooltip,
@@ -15,7 +26,8 @@ import {
   Pie,
   PieChart,
   Cell,
-} from "@/components/ui/chart"
+  ResponsiveContainer,
+} from "recharts";
 
 // Year groups for filtering
 const yearGroups = [
@@ -24,62 +36,70 @@ const yearGroups = [
   { value: "2", label: "2nd Year" },
   { value: "3", label: "3rd Year" },
   { value: "4", label: "4th Year" },
-]
+];
 
 // Colors for charts
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"]
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 const YEAR_COLORS = {
   1: "#3b82f6", // blue
   2: "#10b981", // green
   3: "#8b5cf6", // purple
   4: "#f59e0b", // amber
-}
+};
 
 export function LabAnalytics() {
-  const [bookings, setBookings] = useState([])
-  const [labs, setLabs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedYearGroup, setSelectedYearGroup] = useState("all")
-  const [selectedTimeframe, setSelectedTimeframe] = useState("week")
+  const [bookings, setBookings] = useState<
+    { labId: string; yearGroup: number; date: string; isExam?: boolean }[]
+  >([]);
+  const [labs, setLabs] = useState<{ _id: string; name: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedYearGroup, setSelectedYearGroup] = useState("all");
+  const [selectedTimeframe, setSelectedTimeframe] = useState("week");
 
   // Fetch data
   useEffect(() => {
     async function fetchData() {
       try {
-        setLoading(true)
+        setLoading(true);
 
         // Build URL for bookings with year group filter
-        let bookingsUrl = "/api/bookings?status=approved"
+        let bookingsUrl = "/api/bookings?status=approved";
         if (selectedYearGroup !== "all") {
-          bookingsUrl += `&yearGroup=${selectedYearGroup}`
+          bookingsUrl += `&yearGroup=${selectedYearGroup}`;
         }
 
         const [labsRes, bookingsRes] = await Promise.all([
           fetch("/api/labs", { cache: "no-store" }),
           fetch(bookingsUrl, { cache: "no-store" }),
-        ])
+        ]);
 
-        const labsData = labsRes.ok ? await labsRes.json() : []
-        const bookingsData = bookingsRes.ok ? await bookingsRes.json() : []
+        const labsData = labsRes.ok ? await labsRes.json() : [];
+        const bookingsData = bookingsRes.ok ? await bookingsRes.json() : [];
 
-        setLabs(labsData)
-        setBookings(bookingsData)
+        setLabs(labsData);
+        setBookings(bookingsData);
       } catch (error) {
-        console.error("Error fetching analytics data:", error)
-        setLabs([])
-        setBookings([])
+        console.error("Error fetching analytics data:", error);
+        setLabs([]);
+        setBookings([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    fetchData()
-  }, [selectedYearGroup])
+    fetchData();
+  }, [selectedYearGroup]);
 
   // Process data for charts
   const processUtilizationByDay = () => {
-    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-    const dayMap = { 1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday" }
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const dayMap = {
+      1: "Monday",
+      2: "Tuesday",
+      3: "Wednesday",
+      4: "Thursday",
+      5: "Friday",
+    };
 
     // Initialize data structure
     const utilizationData = days.map((day) => ({
@@ -89,70 +109,75 @@ export function LabAnalytics() {
       year2: 0,
       year3: 0,
       year4: 0,
-    }))
+    }));
 
     // Count bookings by day and year
     bookings.forEach((booking: any) => {
-      const date = new Date(booking.date)
-      const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, etc.
+      const date = new Date(booking.date);
+      const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
 
       if (dayOfWeek >= 1 && dayOfWeek <= 5) {
         // Only weekdays
-        const dayName = dayMap[dayOfWeek as keyof typeof dayMap]
-        const dayIndex = days.indexOf(dayName)
+        const dayName = dayMap[dayOfWeek as keyof typeof dayMap];
+        const dayIndex = days.indexOf(dayName);
 
         if (dayIndex !== -1) {
-          utilizationData[dayIndex].total += 1
+          utilizationData[dayIndex].total += 1;
 
           // Increment year-specific counter
-          if (booking.yearGroup === 1) utilizationData[dayIndex].year1 += 1
-          else if (booking.yearGroup === 2) utilizationData[dayIndex].year2 += 1
-          else if (booking.yearGroup === 3) utilizationData[dayIndex].year3 += 1
-          else if (booking.yearGroup === 4) utilizationData[dayIndex].year4 += 1
+          if (booking.yearGroup === 1) utilizationData[dayIndex].year1 += 1;
+          else if (booking.yearGroup === 2)
+            utilizationData[dayIndex].year2 += 1;
+          else if (booking.yearGroup === 3)
+            utilizationData[dayIndex].year3 += 1;
+          else if (booking.yearGroup === 4)
+            utilizationData[dayIndex].year4 += 1;
         }
       }
-    })
+    });
 
-    return utilizationData
-  }
+    return utilizationData;
+  };
 
   const processUtilizationByLab = () => {
     // Create a map to store lab utilization
-    const labUtilization: Record<string, number> = {}
+    const labUtilization: Record<string, number> = {};
 
     // Initialize with all labs
-    labs.forEach((lab: any) => {
-      labUtilization[lab._id] = 0
-    })
+    labs.forEach((lab: { _id: string; name: string }) => {
+      labUtilization[lab._id] = 0;
+    });
 
     // Count bookings by lab
     bookings.forEach((booking: any) => {
       if (labUtilization[booking.labId] !== undefined) {
-        labUtilization[booking.labId] += 1
+        labUtilization[booking.labId] += 1;
       }
-    })
+    });
 
     // Convert to chart data format
     return Object.entries(labUtilization)
       .map(([labId, count]) => {
-        const lab = labs.find((l: any) => l._id === labId)
+        const lab = labs.find(
+          (l: { _id: string; name: string }) => l._id === labId
+        );
         return {
           name: lab ? lab.name : labId,
           value: count,
-        }
+        };
       })
-      .sort((a, b) => b.value - a.value) // Sort by count descending
-  }
+      .sort((a, b) => b.value - a.value); // Sort by count descending
+  };
 
   const processUtilizationByYearGroup = () => {
     // Count bookings by year group
-    const yearCounts = [0, 0, 0, 0] // Index 0 = Year 1, etc.
+    const yearCounts = [0, 0, 0, 0]; // Index 0 = Year 1, etc.
 
     bookings.forEach((booking: any) => {
       if (booking.yearGroup >= 1 && booking.yearGroup <= 4) {
-        yearCounts[booking.yearGroup - 1] += 1
+        yearCounts[booking.yearGroup - 1] += 1;
       }
-    })
+    });
 
     // Convert to chart data format
     return [
@@ -160,22 +185,29 @@ export function LabAnalytics() {
       { name: "2nd Year", value: yearCounts[1], color: YEAR_COLORS[2] },
       { name: "3rd Year", value: yearCounts[2], color: YEAR_COLORS[3] },
       { name: "4th Year", value: yearCounts[3], color: YEAR_COLORS[4] },
-    ]
-  }
+    ];
+  };
 
-  const utilizationByDay = processUtilizationByDay()
-  const utilizationByLab = processUtilizationByLab()
-  const utilizationByYearGroup = processUtilizationByYearGroup()
+  const utilizationByDay = processUtilizationByDay();
+  const utilizationByLab = processUtilizationByLab();
+  const utilizationByYearGroup = processUtilizationByYearGroup();
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64">Loading analytics data...</div>
+    return (
+      <div className="flex items-center justify-center h-64">
+        Loading analytics data...
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-2">
-          <Select value={selectedYearGroup} onValueChange={setSelectedYearGroup}>
+          <Select
+            value={selectedYearGroup}
+            onValueChange={setSelectedYearGroup}
+          >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Filter by year" />
             </SelectTrigger>
@@ -190,7 +222,10 @@ export function LabAnalytics() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
+          <Select
+            value={selectedTimeframe}
+            onValueChange={setSelectedTimeframe}
+          >
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Timeframe" />
             </SelectTrigger>
@@ -215,58 +250,85 @@ export function LabAnalytics() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Bookings
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{bookings.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  {selectedYearGroup === "all" ? "All year groups" : `Year ${selectedYearGroup} only`}
+                  {selectedYearGroup === "all"
+                    ? "All year groups"
+                    : `Year ${selectedYearGroup} only`}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Exam Bookings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{bookings.filter((b: any) => b.isExam).length}</div>
-                <p className="text-xs text-muted-foreground">
-                  {((bookings.filter((b: any) => b.isExam).length / bookings.length) * 100).toFixed(1)}% of total
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Most Used Lab</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Exam Bookings
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {utilizationByLab.length > 0 ? utilizationByLab[0].name : "N/A"}
+                  {bookings.filter((b: any) => b.isExam).length}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {utilizationByLab.length > 0 ? `${utilizationByLab[0].value} bookings` : "No data available"}
+                  {(
+                    (bookings.filter((b: any) => b.isExam).length /
+                      bookings.length) *
+                    100
+                  ).toFixed(1)}
+                  % of total
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Busiest Day</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Most Used Lab
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {utilizationByLab.length > 0
+                    ? utilizationByLab[0].name
+                    : "N/A"}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {utilizationByLab.length > 0
+                    ? `${utilizationByLab[0].value} bookings`
+                    : "No data available"}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Busiest Day
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   {
-                    utilizationByDay.reduce((max, day) => (day.total > max.total ? day : max), {
-                      name: "N/A",
-                      total: 0,
-                    }).name
+                    utilizationByDay.reduce(
+                      (max, day) => (day.total > max.total ? day : max),
+                      {
+                        name: "N/A",
+                        total: 0,
+                      }
+                    ).name
                   }
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {
-                    utilizationByDay.reduce((max, day) => (day.total > max.total ? day : max), {
-                      name: "N/A",
-                      total: 0,
-                    }).total
+                    utilizationByDay.reduce(
+                      (max, day) => (day.total > max.total ? day : max),
+                      {
+                        name: "N/A",
+                        total: 0,
+                      }
+                    ).total
                   }{" "}
                   bookings
                 </p>
@@ -278,7 +340,9 @@ export function LabAnalytics() {
             <Card>
               <CardHeader>
                 <CardTitle>Bookings by Day</CardTitle>
-                <CardDescription>Distribution of bookings across weekdays</CardDescription>
+                <CardDescription>
+                  Distribution of bookings across weekdays
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -287,7 +351,11 @@ export function LabAnalytics() {
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="total" fill="#8884d8" name="Total Bookings" />
+                      <Bar
+                        dataKey="total"
+                        fill="#8884d8"
+                        name="Total Bookings"
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -297,7 +365,9 @@ export function LabAnalytics() {
             <Card>
               <CardHeader>
                 <CardTitle>Bookings by Year Group</CardTitle>
-                <CardDescription>Distribution of bookings by year group</CardDescription>
+                <CardDescription>
+                  Distribution of bookings by year group
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -311,7 +381,9 @@ export function LabAnalytics() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
                       >
                         {utilizationByYearGroup.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -330,7 +402,9 @@ export function LabAnalytics() {
           <Card>
             <CardHeader>
               <CardTitle>Daily Booking Distribution</CardTitle>
-              <CardDescription>Detailed breakdown of bookings by day and year group</CardDescription>
+              <CardDescription>
+                Detailed breakdown of bookings by day and year group
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[400px]">
@@ -340,10 +414,30 @@ export function LabAnalytics() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="year1" stackId="a" fill={YEAR_COLORS[1]} name="1st Year" />
-                    <Bar dataKey="year2" stackId="a" fill={YEAR_COLORS[2]} name="2nd Year" />
-                    <Bar dataKey="year3" stackId="a" fill={YEAR_COLORS[3]} name="3rd Year" />
-                    <Bar dataKey="year4" stackId="a" fill={YEAR_COLORS[4]} name="4th Year" />
+                    <Bar
+                      dataKey="year1"
+                      stackId="a"
+                      fill={YEAR_COLORS[1]}
+                      name="1st Year"
+                    />
+                    <Bar
+                      dataKey="year2"
+                      stackId="a"
+                      fill={YEAR_COLORS[2]}
+                      name="2nd Year"
+                    />
+                    <Bar
+                      dataKey="year3"
+                      stackId="a"
+                      fill={YEAR_COLORS[3]}
+                      name="3rd Year"
+                    />
+                    <Bar
+                      dataKey="year4"
+                      stackId="a"
+                      fill={YEAR_COLORS[4]}
+                      name="4th Year"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -380,7 +474,9 @@ export function LabAnalytics() {
           <Card>
             <CardHeader>
               <CardTitle>Year Group Distribution</CardTitle>
-              <CardDescription>Booking distribution across year groups</CardDescription>
+              <CardDescription>
+                Booking distribution across year groups
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[400px]">
@@ -394,7 +490,9 @@ export function LabAnalytics() {
                       outerRadius={120}
                       fill="#8884d8"
                       dataKey="value"
-                      label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                      label={({ name, value, percent }) =>
+                        `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
+                      }
                     >
                       {utilizationByYearGroup.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -410,6 +508,5 @@ export function LabAnalytics() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
-
