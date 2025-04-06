@@ -41,12 +41,7 @@ export default function HomePage() {
             >
               Features
             </Link>
-            <Link
-              href="/contact"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground hidden md:inline-block"
-            >
-              Contact
-            </Link>
+
             <Link href="/login">
               <Button variant="outline" size="sm">
                 Login
