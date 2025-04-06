@@ -47,7 +47,7 @@ export function BookingRequests() {
           description: result.message,
         });
         // Remove the request from the state
-        setRequests(requests.filter((request: any) => request.id !== id));
+        setRequests(requests.filter((request: any) => request._id !== id));
       } else {
         toast({
           title: "Error",
@@ -132,7 +132,7 @@ export function BookingRequests() {
                 onClick={() => handleReject(request._id)}
                 disabled={processing !== null}
               >
-                {processing?.id === request.id &&
+                {processing?.id === request._id &&
                 processing?.action === "reject"
                   ? "Rejecting..."
                   : "Reject"}
@@ -140,9 +140,12 @@ export function BookingRequests() {
               <Button
                 size="sm"
                 onClick={() => handleApprove(request._id)}
-                disabled={processing !== null}
+                disabled={
+                  processing?.id === request._id &&
+                  processing?.action === "approve"
+                }
               >
-                {processing?.id === request.id &&
+                {processing?.id === request._id &&
                 processing?.action === "approve"
                   ? "Approving..."
                   : "Approve"}

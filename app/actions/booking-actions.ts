@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache"
 import { connectToDatabase } from "@/lib/mongodb"
 import Booking from "@/models/Booking"
 import Lab from "@/models/Lab"
+import User from "@/models/User"
 import mongoose from "mongoose"
+import { sendBookingStatusEmail } from "@/lib/mail"
 
 export async function createBooking(formData: FormData) {
   try {
@@ -131,25 +133,27 @@ export async function updateBookingStatus(id: string, status: string) {
   try {
     await connectToDatabase()
 
-    // Validate booking ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return {
-        success: false,
-        message: "Invalid booking ID",
-      }
+      return { success: false, message: "Invalid booking ID" }
     }
 
-    // Update booking status
+    // Fetch the updated booking
     const booking = await Booking.findByIdAndUpdate(id, { $set: { status } }, { new: true })
 
     if (!booking) {
-      return {
-        success: false,
-        message: "Booking not found",
-      }
+      return { success: false, message: "Booking not found" }
     }
 
-    // Revalidate the dashboard page to show the updated booking
+    // Fetch user email using userId
+    const user = await User.findById(booking.userId)
+    const userEmail = user?.email || null
+
+    if (userEmail) {
+      await sendBookingStatusEmail(userEmail, status, booking.title)
+    } else {
+      console.warn("User email not found, email not sent.")
+    }
+
     revalidatePath("/dashboard")
     revalidatePath("/dashboard/admin")
 
@@ -165,7 +169,6 @@ export async function updateBookingStatus(id: string, status: string) {
     }
   }
 }
-
 export async function deleteBooking(id: string) {
   try {
     await connectToDatabase()
