@@ -1,36 +1,42 @@
 import type React from "react";
-import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { AuthProvider } from "@/context/AuthContext";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 import { BookingProvider } from "@/context/booking-context";
-import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lab Booking System",
-  description: "CSE Lab Booking System",
-  generator: "v0.dev",
+  title: {
+    default: "LabBook - Lab Booking System",
+    template: "%s | LabBook",
+  },
+  description:
+    "A comprehensive system for booking and managing laboratory halls",
+  keywords: ["lab booking", "laboratory management", "education", "scheduling"],
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <BookingProvider>
-            {children}
-            <Toaster />
-          </BookingProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <BookingProvider>{children}</BookingProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
 }
-
-import "./globals.css";

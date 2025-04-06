@@ -1,14 +1,27 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Edit, Plus, Search, Trash } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
-import { deleteUser } from "@/app/actions/user-actions"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Edit, Plus, Search, Trash } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import { deleteUser } from "@/app/actions/user-actions";
 import {
   Dialog,
   DialogContent,
@@ -17,12 +30,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { cn } from "@/lib/utils";
 
 const userFormSchema = z.object({
   name: z.string().min(3, {
@@ -38,17 +59,17 @@ const userFormSchema = z.object({
     message: "Please select a role.",
   }),
   yearGroup: z.string().optional(),
-})
+});
 
-type UserFormValues = z.infer<typeof userFormSchema>
+type UserFormValues = z.infer<typeof userFormSchema>;
 
 export function UserManagement() {
-  const [users, setUsers] = useState([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [isDeleting, setIsDeleting] = useState<number | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [users, setUsers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -59,71 +80,71 @@ export function UserManagement() {
       role: "",
       yearGroup: "",
     },
-  })
+  });
 
   // Fetch users data
   useEffect(() => {
     async function fetchUsers() {
       try {
-        setLoading(true)
-        const response = await fetch("/api/users")
+        setLoading(true);
+        const response = await fetch("/api/users");
 
         if (response.ok) {
-          const data = await response.json()
-          setUsers(data)
+          const data = await response.json();
+          setUsers(data);
         }
       } catch (error) {
-        console.error("Error fetching users:", error)
+        console.error("Error fetching users:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, []);
 
   const filteredUsers = users.filter(
     (user: any) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+      user.role.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleDeleteUser = async (id: number) => {
     try {
-      setIsDeleting(id)
-      const result = await deleteUser(id)
+      setIsDeleting(id);
+      const result = await deleteUser(id.toString());
 
       if (result.success) {
         toast({
           title: "Success",
           description: result.message,
-        })
+        });
         // Remove the user from the state
-        setUsers(users.filter((user: any) => user.id !== id))
+        setUsers(users.filter((user: any) => user.id !== id));
       } else {
         toast({
           title: "Error",
           description: result.message,
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error deleting user:", error)
+      console.error("Error deleting user:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsDeleting(null)
+      setIsDeleting(null);
     }
-  }
+  };
 
   const onSubmit = async (data: UserFormValues) => {
     try {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
 
       // In a real app, this would call a server action to create the user
       // Make sure yearGroup is properly formatted for Student and YearCoordinator roles
@@ -133,7 +154,7 @@ export function UserManagement() {
           data.role === "Student" || data.role === "YearCoordinator"
             ? Number.parseInt(data.yearGroup || "1")
             : undefined,
-      }
+      };
 
       const response = await fetch("/api/users", {
         method: "POST",
@@ -141,44 +162,48 @@ export function UserManagement() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
-      })
+      });
 
       if (response.ok) {
-        const newUser = await response.json()
+        const newUser = await response.json();
 
         toast({
           title: "Success",
           description: "User created successfully",
-        })
+        });
 
         // Add the new user to the state
-        setUsers([...users, newUser])
+        setUsers([...users, newUser]);
 
         // Close the dialog and reset the form
-        setIsDialogOpen(false)
-        form.reset()
+        setIsDialogOpen(false);
+        form.reset();
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: "Error",
           description: error.error || "Failed to create user",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error creating user:", error)
+      console.error("Error creating user:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-32">Loading users...</div>
+    return (
+      <div className="flex items-center justify-center h-32">
+        Loading users...
+      </div>
+    );
   }
 
   return (
@@ -204,10 +229,15 @@ export function UserManagement() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New User</DialogTitle>
-              <DialogDescription>Fill in the details to create a new user account.</DialogDescription>
+              <DialogDescription>
+                Fill in the details to create a new user account.
+              </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="name"
@@ -228,7 +258,11 @@ export function UserManagement() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="Enter email address" {...field} />
+                        <Input
+                          type="email"
+                          placeholder="Enter email address"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -240,18 +274,25 @@ export function UserManagement() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Department</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select department" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Computer Science">Computer Science</SelectItem>
+                          <SelectItem value="Computer Science">
+                            Computer Science
+                          </SelectItem>
                           <SelectItem value="Physics">Physics</SelectItem>
                           <SelectItem value="Chemistry">Chemistry</SelectItem>
                           <SelectItem value="Biology">Biology</SelectItem>
-                          <SelectItem value="Engineering">Engineering</SelectItem>
+                          <SelectItem value="Engineering">
+                            Engineering
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -264,7 +305,10 @@ export function UserManagement() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Role</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select role" />
@@ -274,7 +318,9 @@ export function UserManagement() {
                           <SelectItem value="Admin">Admin</SelectItem>
                           <SelectItem value="Teacher">Teacher</SelectItem>
                           <SelectItem value="Student">Student</SelectItem>
-                          <SelectItem value="YearCoordinator">YearCoordinator</SelectItem>
+                          <SelectItem value="YearCoordinator">
+                            YearCoordinator
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -290,7 +336,10 @@ export function UserManagement() {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        disabled={form.watch("role") !== "Student" && form.watch("role") !== "YearCoordinator"}
+                        disabled={
+                          form.watch("role") !== "Student" &&
+                          form.watch("role") !== "YearCoordinator"
+                        }
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -304,7 +353,9 @@ export function UserManagement() {
                           <SelectItem value="4">4th Year</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormDescription>Required for students and year coordinators</FormDescription>
+                      <FormDescription>
+                        Required for students and year coordinators
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -333,13 +384,16 @@ export function UserManagement() {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                <TableCell
+                  colSpan={5}
+                  className="text-center py-4 text-muted-foreground"
+                >
                   No users found.
                 </TableCell>
               </TableRow>
             ) : (
               filteredUsers.map((user: any) => (
-                <TableRow key={user.id}>
+                <TableRow key={user._id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.department}</TableCell>
@@ -349,7 +403,7 @@ export function UserManagement() {
                       className={cn(
                         user.role === "Admin" && "bg-primary/10 text-primary",
                         user.role === "Teacher" && "bg-blue-100 text-blue-800",
-                        user.role === "Student" && "bg-green-100 text-green-800",
+                        user.role === "Student" && "bg-green-100 text-green-800"
                       )}
                     >
                       {user.role}
@@ -381,6 +435,5 @@ export function UserManagement() {
         </Table>
       </div>
     </div>
-  )
+  );
 }
-

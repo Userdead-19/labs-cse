@@ -115,6 +115,7 @@ export const BookingProvider = ({ children }: BookingProviderProps) => {
   };
 
   useEffect(() => {
+    console.log("Fetching data...");
     fetchData();
   }, []);
 

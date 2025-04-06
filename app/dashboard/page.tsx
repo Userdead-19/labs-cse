@@ -80,6 +80,8 @@ function DashboardLoading() {
 }
 
 export default function DashboardPage() {
+  console.log("DashboardContent rendered");
+
   return (
     <BookingProvider>
       <DashboardShell>

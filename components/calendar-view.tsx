@@ -105,6 +105,8 @@ export function CalendarView({ view = "week" }: CalendarViewProps) {
 
   // Get booking details for a specific slot
   const getBookingDetails = (labId: string, date: string, time: string) => {
+    console.log("getBookingDetails", labId, date, time);
+    console.log("filteredBookings", filteredBookings);
     return filteredBookings.find(
       (booking) =>
         booking.labId === labId &&
