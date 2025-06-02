@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { BookingProvider } from "@/context/booking-context";
 import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "@/components/ui/toast"; // <-- Import it
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,7 +34,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <BookingProvider>{children}</BookingProvider>
+            <BookingProvider>
+              {children}
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                duration={3000}
+              />
+            </BookingProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

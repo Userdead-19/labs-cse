@@ -1,35 +1,30 @@
-"use client"
+"use client";
 
-import { useToast } from "@/hooks/use-toast"
-import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from "@/components/ui/toast"
+import * as React from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts, dismiss } = useToast();
 
   return (
-    <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
-        return (
-          <Toast key={id} {...props}>
-            <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
-            </div>
-            {action}
-            <ToastClose />
-          </Toast>
-        )
-      })}
-      <ToastViewport />
-    </ToastProvider>
-  )
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className="relative bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-md rounded p-4 min-w-[250px]"
+        >
+          <button
+            onClick={() => dismiss(toast.id)}
+            className="absolute top-1 right-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+          >
+            ✖
+          </button>
+          <p className="font-medium">{toast.title}</p>
+          {toast.description && (
+            <p className="text-sm text-zinc-500">{toast.description}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }

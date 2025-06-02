@@ -11,10 +11,8 @@ export async function middleware(request: NextRequest) {
     pathname === route || pathname.startsWith(route + "/")
   )
 
-  // Extract token from cookie for both page and API routes
   const token = request.cookies.get("token")?.value
 
-  // If it's a protected route or protected API and token is missing/invalid
   const isProtectedAPI = pathname.startsWith("/api/") &&
     !pathname.startsWith("/api/auth/")
 
@@ -24,7 +22,6 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: "Authentication required" }, { status: 401 })
       } else {
         const loginUrl = new URL("/login", request.url)
-        loginUrl.searchParams.set("from", encodeURIComponent(pathname))
         return NextResponse.redirect(loginUrl)
       }
     }
@@ -35,7 +32,6 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 })
       } else {
         const loginUrl = new URL("/login", request.url)
-        loginUrl.searchParams.set("from", encodeURIComponent(pathname))
         return NextResponse.redirect(loginUrl)
       }
     }

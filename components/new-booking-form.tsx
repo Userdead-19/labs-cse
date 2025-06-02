@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -134,24 +134,17 @@ export function NewBookingForm() {
       const result = await createBooking(formData);
 
       if (result.success) {
-        toast({
-          title: "Success",
-          description: result.message,
-        });
+        toast.success(result.message || "Success");
         refreshData();
         router.push("/dashboard");
       } else {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
+        toast.error(result.message || "An error occurred", {
+          duration: 5000,
         });
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
+      toast.error("Failed to submit booking request. Please try again later.", {
+        duration: 5000,
       });
     } finally {
       setIsSubmitting(false);
